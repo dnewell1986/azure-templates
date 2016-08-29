@@ -36,41 +36,7 @@ function Disable-SslPowershellError {
 }
 
 function Install-IIS {
-	$packages = "IIS-WebServer;" +
-	"IIS-WebServerRole;" +
-	"IIS-FTPServer;" +
-	"IIS-FTPExtensibility;" +
-	"IIS-FTPSvc;" +
-	"IIS-IIS6ManagementCompatibility;" +
-	"IIS-Metabase;" +
-	"IIS-ManagementConsole;" +
-	"IIS-ApplicationDevelopment;" +
-	"IIS-NetFxExtensibility;" +
-	"IIS-ASP;" +
-	"IIS-ASPNET;" +
-	"IIS-ISAPIExtensions;" +
-	"IIS-ISAPIFilter;" +
-	"IIS-ServerSideIncludes;" +
-	"IIS-CommonHttpFeatures;" +
-	"IIS-DefaultDocument;" +
-	"IIS-DirectoryBrowsing;" +
-	"IIS-HttpErrors;" +
-	"IIS-HttpRedirect;" +
-	"IIS-StaticContent;" +
-	"IIS-HealthAndDiagnostics;" +
-	"IIS-HttpLogging;" +
-	"IIS-LoggingLibraries;" +
-	"IIS-RequestMonitor;" +
-	"IIS-HttpTracing;" +
-	"IIS-Performance;" +
-	"IIS-HttpCompressionDynamic;" +
-	"IIS-HttpCompressionStatic;" +
-	"IIS-Security;" +
-	"IIS-BasicAuthentication;" +
-	"IIS-RequestFiltering;" +
-	"IIS-WindowsAuthentication"
-
-	Start-Process "pkgmgr" "/iu:$packages"
+    CMD /C Start /w pkgmgr /l:log.etw /iu:IIS-WebServer;IIS-WebServerRole;IIS-FTPServer;IIS-FTPExtensibility;IIS-FTPSvc;IIS-IIS6ManagementCompatibility;IIS-Metabase;IIS-ManagementConsole;IIS-ApplicationDevelopment;IIS-NetFxExtensibility;IIS-ASP;IIS-ASPNET;IIS-ISAPIExtensions;IIS-ISAPIFilter;IIS-ServerSideIncludes;IIS-CommonHttpFeatures;IIS-DefaultDocument;IIS-DirectoryBrowsing;IIS-HttpErrors;IIS-HttpRedirect;IIS-StaticContent;IIS-HealthAndDiagnostics;IIS-HttpLogging;IIS-LoggingLibraries;IIS-RequestMonitor;IIS-HttpTracing;IIS-Performance;IIS-HttpCompressionDynamic;IIS-HttpCompressionStatic;IIS-Security;IIS-BasicAuthentication;IIS-RequestFiltering;IIS-WindowsAuthentication 
 }
 
 function Register-AspNet {
@@ -78,10 +44,74 @@ function Register-AspNet {
 }
 
 function Install-ChocolateyApps {
-	choco install googlechrome -y -r 
+	choco install googlechrome -y -r;
 	choco install crystalreports2010runtime -y -r --allow-empty-checksums; 
 	choco install webdeploy -y -r --allow-empty-checksums; choco install powershell -y -r
 }
+
+function Set-ComputerTime {
+    tzutil.exe /s 'Central Standard Time'
+
+    Stop-Service W32Time -Force
+    W32tm /config /syncfromflags:manual
+    W32tm /config /manualpeerlist:"0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org"
+    W32tm /config /reliable:no
+
+    Set-Service -Name W32Time -StartupType Automatic
+    Start-Service W32Time
+    W32tm /resync /force
+}
+
+function Install-MSMQ {
+    Import-Module -Name ServerManager
+
+    # use Get-WindowsFeature to get a full list
+
+    $msmqFeatures = @(
+        'MSMQ-Server',
+        'MSMQ-HTTP-Support',
+        'MSMQ-Multicasting'
+    )
+        
+    if (Get-Command Add-WindowsFeature -ErrorAction SilentlyContinue) {	
+        $check = ($msmqFeatures | Get-WindowsFeature)
+
+        if($check -eq $null) { return }
+
+        $uninstalledMsmqFeatures = $msmqFeatures | Get-WindowsFeature | Where-Object {
+            $_.Installed -eq $false
+        }
+        
+        if($uninstalledMsmqFeatures.Length -gt 0) {
+            $uninstalledMsmqFeatures | Add-WindowsFeature -IncludeAllSubFeature -Restart
+        }
+    }
+}
+
+function Install-Smtp {
+    Import-Module -Name ServerManager
+
+    # use Get-WindowsFeature to get a full list
+
+    $smtpFeatures = @(
+        'SMTP-Server'
+    )
+        
+    if (Get-Command Add-WindowsFeature -ErrorAction SilentlyContinue) {	
+        $check = ($smtpFeatures | Get-WindowsFeature)
+
+        if($check -eq $null) { return }
+
+        $uninstalledSmtpFeatures = $smtpFeatures | Get-WindowsFeature | Where-Object {
+            $_.Installed -eq $false
+        }
+        
+        if($uninstalledSmtpFeatures.Length -gt 0) {
+            $uninstalledSmtpFeatures | Add-WindowsFeature -IncludeAllSubFeature -Restart
+        }
+    }
+}
+
 
 Install-Chocolatey
 # needed by WMF 4.0+
@@ -94,11 +124,15 @@ if(Get-Command Install-WindowsFeature -ErrorAction SilentlyContinue) {
 	Install-WindowsFeature NET-Framework-Core # needs to be here otherwise other packages won't install
 }
 
-Install-IIS
+#Install-IIS
 
 Register-AspNet
 
 Install-ChocolateyApps
+
+Set-ComputerTime
+
+Install-MSMQ
 
 
 
