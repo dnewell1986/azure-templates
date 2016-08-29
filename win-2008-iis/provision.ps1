@@ -36,7 +36,12 @@ function Disable-SslPowershellError {
 }
 
 function Install-IIS {
-    CMD /C Start /w pkgmgr /l:log.etw /iu:IIS-WebServer;IIS-WebServerRole;IIS-FTPServer;IIS-FTPExtensibility;IIS-FTPSvc;IIS-IIS6ManagementCompatibility;IIS-Metabase;IIS-ManagementConsole;IIS-ApplicationDevelopment;IIS-NetFxExtensibility;IIS-ASP;IIS-ASPNET;IIS-ISAPIExtensions;IIS-ISAPIFilter;IIS-ServerSideIncludes;IIS-CommonHttpFeatures;IIS-DefaultDocument;IIS-DirectoryBrowsing;IIS-HttpErrors;IIS-HttpRedirect;IIS-StaticContent;IIS-HealthAndDiagnostics;IIS-HttpLogging;IIS-LoggingLibraries;IIS-RequestMonitor;IIS-HttpTracing;IIS-Performance;IIS-HttpCompressionDynamic;IIS-HttpCompressionStatic;IIS-Security;IIS-BasicAuthentication;IIS-RequestFiltering;IIS-WindowsAuthentication 
+    import-module servermanager
+    add-windowsfeature -Name Web-Server,Web-WebServer,Web-Common-Http,Web-Static-Content,Web-Default-Doc,Web-Dir-Browsing,
+        Web-Http-Errors,Web-Http-Redirect,Web-App-Dev,Web-Asp-Net,Web-Net-Ext,Web-ASP,Web-ISAPI-Ext,Web-ISAPI-Filter,
+        Web-Includes,Web-Health,Web-Http-Logging,Web-Log-Libraries,Web-Request-Monitor,Web-Http-Tracing,Web-ODBC-Logging,
+        Web-Security,Web-Basic-Auth,Web-Windows-Auth,Web-Filtering,Web-Performance,Web-Stat-Compression,Web-Dyn-Compression,
+        Web-Mgmt-Tools,Web-Mgmt-Console,Web-Mgmt-Compat,Web-Metabase,Web-Lgcy-Mgmt-Console,Web-Ftp-Server,Web-Ftp-Service
 }
 
 function Register-AspNet {
@@ -65,51 +70,13 @@ function Set-ComputerTime {
 function Install-MSMQ {
     Import-Module -Name ServerManager
 
-    # use Get-WindowsFeature to get a full list
-
-    $msmqFeatures = @(
-        'MSMQ-Server',
-        'MSMQ-HTTP-Support',
-        'MSMQ-Multicasting'
-    )
-        
-    if (Get-Command Add-WindowsFeature -ErrorAction SilentlyContinue) {	
-        $check = ($msmqFeatures | Get-WindowsFeature)
-
-        if($check -eq $null) { return }
-
-        $uninstalledMsmqFeatures = $msmqFeatures | Get-WindowsFeature | Where-Object {
-            $_.Installed -eq $false
-        }
-        
-        if($uninstalledMsmqFeatures.Length -gt 0) {
-            $uninstalledMsmqFeatures | Add-WindowsFeature -IncludeAllSubFeature -Restart
-        }
-    }
+    Add-WindowsFeature MSMQ,MSMQ-Services,MSMQ-Server,MSMQ-HTTP-Support,MSMQ-Multicasting
 }
 
 function Install-Smtp {
     Import-Module -Name ServerManager
 
-    # use Get-WindowsFeature to get a full list
-
-    $smtpFeatures = @(
-        'SMTP-Server'
-    )
-        
-    if (Get-Command Add-WindowsFeature -ErrorAction SilentlyContinue) {	
-        $check = ($smtpFeatures | Get-WindowsFeature)
-
-        if($check -eq $null) { return }
-
-        $uninstalledSmtpFeatures = $smtpFeatures | Get-WindowsFeature | Where-Object {
-            $_.Installed -eq $false
-        }
-        
-        if($uninstalledSmtpFeatures.Length -gt 0) {
-            $uninstalledSmtpFeatures | Add-WindowsFeature -IncludeAllSubFeature -Restart
-        }
-    }
+    Add-WindowsFeature SMTP-Server
 }
 
 
@@ -133,6 +100,8 @@ Install-ChocolateyApps
 Set-ComputerTime
 
 Install-MSMQ
+
+Install-Smtp
 
 
 
