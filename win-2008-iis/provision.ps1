@@ -1,5 +1,4 @@
 function Disable-AutoLogon {
-	'Disabling auto admin logon' | Write-Host
 	reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AutoAdminLogon /d 0 /f
 }
 
@@ -8,14 +7,7 @@ function Install-Chocolatey {
 	choco install WindowsAzurePowershell
 }
 
-function Install-7zip {
-	'Installing 7zip' | Write-Host
-	choco install 7zip -y
-	choco install 7zip.commandline -y
-}
-
 function Install-VSRemoteDebuggingTools {
-	'Installing vs remote debug tools' | Write-Host
 	choco install vs2015remotetools -y
 }
 
@@ -33,15 +25,6 @@ function Disable-SslPowershellError {
 "@
 
 	[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-}
-
-function Install-IIS {
-    import-module servermanager
-    add-windowsfeature -Name Web-Server,Web-WebServer,Web-Common-Http,Web-Static-Content,Web-Default-Doc,Web-Dir-Browsing,
-        Web-Http-Errors,Web-Http-Redirect,Web-App-Dev,Web-Asp-Net,Web-Net-Ext,Web-ASP,Web-ISAPI-Ext,Web-ISAPI-Filter,
-        Web-Includes,Web-Health,Web-Http-Logging,Web-Log-Libraries,Web-Request-Monitor,Web-Http-Tracing,Web-ODBC-Logging,
-        Web-Security,Web-Basic-Auth,Web-Windows-Auth,Web-Filtering,Web-Performance,Web-Stat-Compression,Web-Dyn-Compression,
-        Web-Mgmt-Tools,Web-Mgmt-Console,Web-Mgmt-Compat,Web-Metabase,Web-Lgcy-Mgmt-Console,Web-Ftp-Server,Web-Ftp-Service
 }
 
 function Register-AspNet {
@@ -68,17 +51,14 @@ function Set-ComputerTime {
 }
 
 function Install-MSMQ {
-    Import-Module -Name ServerManager
-
     Add-WindowsFeature MSMQ,MSMQ-Services,MSMQ-Server,MSMQ-HTTP-Support,MSMQ-Multicasting
 }
 
 function Install-Smtp {
-    Import-Module -Name ServerManager
-
     Add-WindowsFeature SMTP-Server
 }
 
+Import-Module -Name ServerManager
 
 Install-Chocolatey
 # needed by WMF 4.0+
@@ -91,7 +71,7 @@ if(Get-Command Install-WindowsFeature -ErrorAction SilentlyContinue) {
 	Install-WindowsFeature NET-Framework-Core # needs to be here otherwise other packages won't install
 }
 
-Install-IIS
+& .\install-iis.ps1
 
 Install-ChocolateyApps
 

@@ -176,7 +176,8 @@
                       "autoUpgradeMinorVersion": true,
                       "settings": {
                         "fileUris": [
-                            "https://netchexvhds.file.core.windows.net/webtemplate/provision.ps1?sv=2015-04-05&ss=bfqt&srt=sco&sp=rwdlacup&se=2016-08-27T02:33:59Z&st=2016-08-26T18:33:59Z&spr=https&sig=UU%2FSTBfzUwb4%2FCrapzTZTaEZR3zrPstDm6xejWi9upo%3D"
+                            "https://raw.githubusercontent.com/dnewell1986/azure-templates/master/win-2008-iis/provision.ps1",
+                            "https://raw.githubusercontent.com/dnewell1986/azure-templates/master/win-2008-iis/install-iis.ps1"
                         ],
                         "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File provision.ps1"
                     }
