@@ -98,7 +98,7 @@ Install-IIS
 
 Register-AspNet
 
-#Install-ChocolateyApps
+Install-ChocolateyApps
 
 
 
