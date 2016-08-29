@@ -91,9 +91,7 @@ if(Get-Command Install-WindowsFeature -ErrorAction SilentlyContinue) {
 	Install-WindowsFeature NET-Framework-Core # needs to be here otherwise other packages won't install
 }
 
-#Install-IIS
-
-Register-AspNet
+Install-IIS
 
 Install-ChocolateyApps
 
@@ -102,6 +100,8 @@ Set-ComputerTime
 Install-MSMQ
 
 Install-Smtp
+
+Register-AspNet
 
 
 
